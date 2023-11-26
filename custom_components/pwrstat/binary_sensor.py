@@ -95,10 +95,10 @@ class PwrStatBinarySensor(CoordinatorEntity, BinarySensorEntity):
 
         # Get value.
         self._attr_is_on = self.entity_description.test(self.coordinator.data[self.entity_description.key])
+        _LOGGER.debug(f"{self._attr_name} --> {self._attr_is_on}")
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        _LOGGER.debug(f"update={self.coordinator.data}")
         self._update()
         self.async_write_ha_state()

@@ -81,7 +81,7 @@ SENSORS = [
         native_unit_of_measurement=UnitOfTime.MINUTES,
         state_class=SensorStateClass.MEASUREMENT,
         suffix="Remaining Runtime",
-        convert=lambda v: v.split(" ")[0]
+        convert=lambda v: int(v.split(" ")[0])
     ),
     PwrStatSensorDescription(
         key="State",
@@ -152,6 +152,7 @@ class PwrStatSensor(CoordinatorEntity, SensorEntity):
 
         # Get value.
         self._attr_native_value = self.entity_description.convert(self.coordinator.data[self.entity_description.key])
+        _LOGGER.debug(f"{self._attr_name} --> {self._attr_native_value}")
 
         # Save attributes if asked for.
         if self.entity_description.extra_attributes:
@@ -161,7 +162,6 @@ class PwrStatSensor(CoordinatorEntity, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        _LOGGER.debug(f"update={self.coordinator.data}")
         self._update()
         self.async_write_ha_state()
 
