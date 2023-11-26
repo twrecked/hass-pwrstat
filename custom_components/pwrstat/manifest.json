@@ -1,6 +1,6 @@
 {
   "domain": "pwrstat",
-  "name": "pwrstat (Cyberpower cli) Support",
+  "name": "pwrstat (Cyberpower) Support",
   "codeowners": [
     "@twrecked"
   ],
