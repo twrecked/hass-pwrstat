@@ -1,0 +1,23 @@
+# The file I use.
+# HOME_NAME comes from the command line or .env
+# All the Cyberpower utilities are linked in from the outside.
+version: '2.1'
+services:
+  ups-status:
+    container_name: ${HOME_NAME}-ups-status
+    image: ups-status
+    network_mode: host
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /usr/sbin/pwrstat:/usr/sbin/pwrstat:ro
+      - /var/pwrstatd.ipc:/var/pwrstatd.ipc:ro
+      - /var/pwrstatd.dev:/var/pwrstatd.dev:ro
+    build: 
+      context: .
+      dockerfile: dockerfile
+    logging:
+      options:
+        max-size: 5m
+        max-file: "3"
+

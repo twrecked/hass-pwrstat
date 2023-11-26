@@ -1,6 +1,7 @@
 # hass-pwrstat
 
-An integration to poll a _Cyberpower_ UPS through [pwrstat-api](https://github.com/sbruggeman/pwrstat-api).
+An integration to poll a _Cyberpower_ UPS throught the
+[pwrstat-api](https://github.com/sbruggeman/pwrstat-api) wrapper.
 
 
 ## Thanks
@@ -15,14 +16,29 @@ Many thanks to:
 * @bruggeman for the `pwrstat-api` wrapper.
 
 
+## Other Options
+
+### Nut
+You can use the [Network UPS Tools](https://www.home-assistant.io/integrations/nut/).
+
+And I did for the longest time and it works well. I just found it a little too
+powerful for my needs. I have 2 PCs each with a Cyberpower UPS on them and 
+it ended up being simpler to monitor them in _Home Assistant_ so a lot of 
+the extra functionality was moot. I also found it would infrequently lock up the
+USB connection.
+
+
 ## Introduction
 
 I wrote this to compliment the _pwrstat-api_ wrapper. I've been accessing the
 wrapper using the [RESTful API](https://www.home-assistant.io/integrations/rest/)
 integration and it was working great. But it was lacking full _Integration_ 
-support and monitoring more than one UPS was a pain to change the config. 
+support and monitoring more than one UPS was a pain manage to config. 
 
 I decided to add proper _Integration_ support.
+
+The integration needs a working `pwrstat-api` server. The integration does not
+support any of the cloud feature of _Cyberpower_.
 
 
 ## Installation
@@ -96,3 +112,7 @@ similar to this:
   method: left
 ```
 
+### `extras/pwrstat`
+
+This is my snapshot of the `pwrstat-api` docker set up. I modified it to mount
+the local tools inside the docker so there was no need to include a `deb` file.
