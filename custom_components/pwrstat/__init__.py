@@ -16,7 +16,7 @@ from .const import *
 from .coordinator import PwrStatCoordinator
 
 
-__version__ = "0.1.0a2"
+__version__ = "0.1.0a3"
 
 _LOGGER = logging.getLogger(__name__)
 
