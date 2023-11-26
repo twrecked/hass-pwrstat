@@ -1,0 +1,16 @@
+{
+  "domain": "pwrstat",
+  "name": "Cyberpower/pwrstat-api UPS Support",
+  "codeowners": [
+    "@twrecked"
+  ],
+  "config_flow": true,
+  "dependencies": [
+  ],
+  "documentation": "https://github.com/twrecked/hass-aarlo/blob/master/README.md",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/twrecked/hass-aarlo/issues",
+  "requirements": [
+  ],
+  "version": "0.1.0a1"
+}
