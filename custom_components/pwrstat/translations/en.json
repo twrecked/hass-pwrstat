@@ -2,8 +2,7 @@
   "title": "Cyberpower/pwrstat-api Devices",
   "config": {
     "error": {
-      "name_used": "That name is already in use, try another.",
-      "url_used": "That URL is already in use, try another."
+      "name_used": "That UPS name is already in use, try another."
     },
     "step": {
       "user": {
