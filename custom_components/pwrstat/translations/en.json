@@ -1,0 +1,20 @@
+{
+  "title": "Cyberpower/pwrstat-api Devices",
+  "config": {
+    "error": {
+      "name_used": "That name is already in use, try another.",
+      "url_used": "That URL is already in use, try another."
+    },
+    "step": {
+      "user": {
+        "title": "Cyberpower/pwrstat-api Device",
+        "description": "Enter the name and URL to your Cyberpower/pwrstat-api device.",
+        "data": {
+          "ups_name": "Name",
+          "ups_url": "URL",
+          "ups_poll_every": "Poll Every"
+        }
+      }
+    }
+  }
+}
