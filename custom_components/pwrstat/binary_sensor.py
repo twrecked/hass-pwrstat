@@ -94,8 +94,13 @@ class PwrStatBinarySensor(CoordinatorEntity, BinarySensorEntity):
             return
 
         # Get value.
-        self._attr_is_on = self.entity_description.test(self.coordinator.data[self.entity_description.key])
-        _LOGGER.debug(f"{self._attr_name} --> {self._attr_is_on}")
+        try:
+            self._attr_is_on = self.entity_description.test(self.coordinator.data[self.entity_description.key])
+            self._attr_available = True
+            _LOGGER.debug(f"{self._attr_name} --> {self._attr_is_on}")
+        except Exception as _e:
+            self._attr_available = False
+            _LOGGER.debug(f"binary_sensor {self.entity_description.key} not available")
 
     @callback
     def _handle_coordinator_update(self) -> None:

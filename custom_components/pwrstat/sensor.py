@@ -151,13 +151,22 @@ class PwrStatSensor(CoordinatorEntity, SensorEntity):
             return
 
         # Get value.
-        self._attr_native_value = self.entity_description.convert(self.coordinator.data[self.entity_description.key])
-        _LOGGER.debug(f"{self._attr_name} --> {self._attr_native_value}")
+        try:
+            self._attr_native_value = self.entity_description.convert(self.coordinator.data[self.entity_description.key])
+            self._attr_available = True
+            _LOGGER.debug(f"{self._attr_name} --> {self._attr_native_value}")
+        except Exception as _e:
+            self._attr_available = False
+            _LOGGER.debug(f"sensor {self.entity_description.key} not available")
 
         # Save attributes if asked for.
         if self.entity_description.extra_attributes:
             for attribute in self.entity_description.extra_attributes.keys():
-                self.entity_description.extra_attributes[attribute] = self.coordinator.data[attribute]
+                try:
+                    self.entity_description.extra_attributes[attribute] = self.coordinator.data[attribute]
+                except Exception as _e:
+                    self.entity_description.extra_attributes[attribute] = "not available"
+                    _LOGGER.debug(f"attribute {attribute} not available")
 
     @callback
     def _handle_coordinator_update(self) -> None:

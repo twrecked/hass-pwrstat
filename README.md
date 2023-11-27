@@ -19,13 +19,13 @@ Many thanks to:
 ## Other Options
 
 ### Nut
-You can use the [Network UPS Tools](https://www.home-assistant.io/integrations/nut/).
+You can also use [Network UPS Tools](https://www.home-assistant.io/integrations/nut/).
 
-And I did for the longest time and it works well. I just found it a little too
+And I did for the longest time and it great. I just found it a little too
 powerful for my needs. I have 2 PCs each with a Cyberpower UPS on them and 
 it ended up being simpler to monitor them in _Home Assistant_ so a lot of 
-the extra functionality was moot. I also found it would infrequently lock up the
-USB connection.
+the extra functionality was moot. Look at it if you're trying to hook different
+UPS devices together across a varierty of systems.
 
 
 ## Introduction
