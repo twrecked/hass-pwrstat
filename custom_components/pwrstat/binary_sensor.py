@@ -16,9 +16,11 @@ from homeassistant.components.binary_sensor import (
     DOMAIN as PLATFORM_DOMAIN,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import callback
+from homeassistant.core import (
+    HomeAssistant,
+    callback,
+)
 from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.typing import HomeAssistantType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
@@ -28,7 +30,7 @@ from .const import *
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(frozen=True)
 class PwrStatBinarySensorDescription(BinarySensorEntityDescription):
     suffix: str = "unknown"
     test: Callable[[Any], Any] | None = None
@@ -51,7 +53,7 @@ SENSORS = [
 
 
 async def async_setup_entry(
-        hass: HomeAssistantType,
+        hass: HomeAssistant,
         entry: ConfigEntry,
         async_add_entities: Callable[[list], None],
 ) -> None:

@@ -23,9 +23,11 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfTime,
 )
-from homeassistant.core import callback
+from homeassistant.core import (
+    HomeAssistant,
+    callback,
+)
 from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.typing import HomeAssistantType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
@@ -35,7 +37,7 @@ from .const import *
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(frozen=True)
 class PwrStatSensorDescription(SensorEntityDescription):
     suffix: str = "unknown"
     convert: Callable[[Any], Any] | None = None
@@ -106,7 +108,7 @@ SENSORS = [
 
 
 async def async_setup_entry(
-        hass: HomeAssistantType,
+        hass: HomeAssistant,
         entry: ConfigEntry,
         async_add_entities: Callable[[list], None],
 ) -> None:
