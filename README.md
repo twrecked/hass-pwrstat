@@ -5,12 +5,6 @@ An integration to poll a _Cyberpower_ UPS throught the [pwrstat-api](https://git
 # Thanks
 
 Many thanks to:
-* [JetBrains](https://www.jetbrains.com/?from=hass-aarlo) for the excellent  
-  **PyCharm IDE** and providing me with an open source licence to speed up the  
-  project development.
-
-  [![JetBrains](images/jetbrains.svg)](https://www.jetbrains.com/?from=hass-aarlo)
-
 * @bruggeman for the `pwrstat-api` wrapper.
 
 # Introduction

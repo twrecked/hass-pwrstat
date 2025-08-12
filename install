@@ -5,7 +5,7 @@ if [[ "${1}" == "go" ]]; then
 	ECHO=
 	shift
 else
-	ECHO=echo
+	ECHO="echo"
 fi
 
 DEST="${1}"
