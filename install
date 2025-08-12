@@ -1,5 +1,4 @@
 #!/bin/bash
-#
 
 if [[ "${1}" == "go" ]]; then
 	ECHO=
