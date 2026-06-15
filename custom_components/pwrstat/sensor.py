@@ -132,8 +132,6 @@ class PwrStatSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, ups_name, ups_id, description):
         super().__init__(coordinator, context=ups_name)
 
-        self._attributes = {}
-
         self.entity_description = description
         self._attr_name = f"{ups_name} {self.entity_description.suffix}"
         self._attr_unique_id = slugify(f"{ups_id} {self.entity_description.suffix}")
@@ -145,38 +143,29 @@ class PwrStatSensor(CoordinatorEntity, SensorEntity):
         self.entity_id = f"{PLATFORM_DOMAIN}.{self._attr_unique_id}"
 
         _LOGGER.info(f"PwrStatSensor: {self.name} created")
-        self._update()
 
-    def _update(self):
-        # Nothing there...
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
         if not self.coordinator.data:
-            return
-
-        # Get value.
+            return None
         try:
-            self._attr_native_value = self.entity_description.convert(self.coordinator.data[self.entity_description.key])
-            self._attr_available = True
-            _LOGGER.debug(f"{self._attr_name} --> {self._attr_native_value}")
-        except Exception as _e:
-            self._attr_available = False
-            _LOGGER.debug(f"sensor {self.entity_description.key} not available")
+            return self.entity_description.convert(self.coordinator.data[self.entity_description.key])
+        except Exception:
+            return None
 
-        # Save attributes if asked for.
-        if self.entity_description.extra_attributes:
-            for attribute in self.entity_description.extra_attributes.keys():
-                try:
-                    self.entity_description.extra_attributes[attribute] = self.coordinator.data[attribute]
-                except Exception as _e:
-                    self.entity_description.extra_attributes[attribute] = "not available"
-                    _LOGGER.debug(f"attribute {attribute} not available")
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        self._update()
-        self.async_write_ha_state()
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return super().available and self.coordinator.data is not None and self.entity_description.key in self.coordinator.data
 
     @property
     def extra_state_attributes(self):
         """Return extra_state_attributes."""
-        return self.entity_description.extra_attributes
+        if not self.entity_description.extra_attributes or not self.coordinator.data:
+            return None
+
+        attrs = {}
+        for attribute in self.entity_description.extra_attributes.keys():
+            attrs[attribute] = self.coordinator.data.get(attribute, "not available")
+        return attrs

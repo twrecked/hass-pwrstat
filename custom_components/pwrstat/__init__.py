@@ -16,7 +16,7 @@ from .const import *
 from .coordinator import PwrStatCoordinator
 
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,6 +51,15 @@ async def async_setup_entry(
 
     _LOGGER.debug(f"{ups_id}: would poll {ups_name} at {ups_url} every {ups_poll_every} seconds")
     return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PWRSTAT_PLATFORMS):
+        ups_name = entry.data[ATTR_UPS_NAME]
+        hass.data[COMPONENT_DOMAIN].pop(ups_name)
+
+    return unload_ok
 
 
 async def _async_get_or_create_pwrstat_device_in_registry(
