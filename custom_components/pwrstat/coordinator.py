@@ -5,14 +5,14 @@ Cyberpower's pwrstat command.
 """
 
 import logging
-import requests
+import asyncio
 from datetime import timedelta
 
 from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
     DataUpdateCoordinator,
     UpdateFailed,
 )
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import *
 
@@ -33,20 +33,19 @@ class PwrStatCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=ups_poll_every),
         )
 
-        self._data = {}
         self._url = ups_url
 
-    def update_data(self):
-        _LOGGER.debug(f"statring update to {self._url}")
-        request = requests.get(self._url)
-        if request.status_code == 200:
-            self._data = request.json()
-        else:
-            self._data = {}
-        _LOGGER.debug(f"data={self._data}")
-
     async def _async_update_data(self):
-        await self.hass.async_add_executor_job(
-            self.update_data
-        )
-        return self._data
+        """Fetch data from API endpoint."""
+        session = async_get_clientsession(self.hass)
+        try:
+            async with asyncio.timeout(10):
+                response = await session.get(self._url)
+                if response.status != 200:
+                    raise UpdateFailed(f"Error fetching data from {self._url}: {response.status}")
+                
+                data = await response.json()
+                _LOGGER.debug(f"data={data}")
+                return data
+        except Exception as err:
+            raise UpdateFailed(f"Error communicating with API: {err}") from err

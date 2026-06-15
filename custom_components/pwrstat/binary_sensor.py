@@ -88,24 +88,18 @@ class PwrStatBinarySensor(CoordinatorEntity, BinarySensorEntity):
         self.entity_id = f"{PLATFORM_DOMAIN}.{self._attr_unique_id}"
 
         _LOGGER.info(f"PwrStatBinarySensor: {self.name} created")
-        self._update()
 
-    def _update(self):
-        # Nothing there...
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
         if not self.coordinator.data:
-            return
-
-        # Get value.
+            return None
         try:
-            self._attr_is_on = self.entity_description.test(self.coordinator.data[self.entity_description.key])
-            self._attr_available = True
-            _LOGGER.debug(f"{self._attr_name} --> {self._attr_is_on}")
-        except Exception as _e:
-            self._attr_available = False
-            _LOGGER.debug(f"binary_sensor {self.entity_description.key} not available")
+            return self.entity_description.test(self.coordinator.data[self.entity_description.key])
+        except Exception:
+            return None
 
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        self._update()
-        self.async_write_ha_state()
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return super().available and self.coordinator.data is not None and self.entity_description.key in self.coordinator.data
