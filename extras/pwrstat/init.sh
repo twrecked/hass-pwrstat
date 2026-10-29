@@ -1,3 +1,2 @@
-#!/bin/bash
-
-/src/pwrstat-api.py
+#!/bin/sh
+exec /src/pwrstat-api.py
