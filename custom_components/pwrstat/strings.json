@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Cyberpower/pwrstat-api Device",
+        "description": "Enter the name and URL for your Cyberpower/pwrstat-api device.",
+        "data": {
+          "ups_name": "Name",
+          "ups_url": "URL",
+          "ups_poll_every": "Polling Interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to pwrstat-api. Please verify the URL and that the container is reachable.",
+      "invalid_response": "Received an invalid or non-JSON response from pwrstat-api.",
+      "name_used": "That UPS name is already configured.",
+      "unknown": "Unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This UPS is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Cyberpower/pwrstat-api Options",
+        "description": "Update the polling interval or API URL.",
+        "data": {
+          "ups_url": "URL",
+          "ups_poll_every": "Polling Interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to pwrstat-api.",
+      "invalid_response": "Received an invalid response from pwrstat-api.",
+      "unknown": "Unexpected error occurred."
+    }
+  }
+}
