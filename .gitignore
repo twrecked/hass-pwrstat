@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+AGENTS.md
+run
+extras/pwrstat/run
