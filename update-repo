@@ -1,0 +1,5 @@
+#!/bin/bash
+
+GH_TOKEN='' gh repo edit twrecked/hass-pwrstat \
+  --description "Home Assistant integration and lightweight Docker API wrapper for CyberPower UPS monitoring via pwrstat." \
+  --add-topic "home-assistant,hacs,custom-component,custom-integration,cyberpower,pwrstat,ups,powerpanel,energy-dashboard,power-monitoring,battery-backup"
