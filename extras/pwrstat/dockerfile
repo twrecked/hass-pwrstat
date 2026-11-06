@@ -1,9 +1,13 @@
-FROM python:3
+FROM python:3.12-slim
 
-VOLUME /src
-COPY pwrstat-api.py requirements.txt init.sh /src/
 WORKDIR /src
-RUN chmod +x /src/init.sh
-RUN chmod +x /src/pwrstat-api.py
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
-ENTRYPOINT "/src/init.sh"
+
+COPY requirements.txt /src/
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY pwrstat-api.py init.sh /src/
+RUN chmod +x /src/init.sh /src/pwrstat-api.py
+
+EXPOSE 5002
+
+ENTRYPOINT ["/src/init.sh"]

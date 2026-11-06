@@ -1,23 +1,26 @@
-# The file I use.
-# HOME_NAME comes from the command line or .env
-# All the Cyberpower utilities are linked in from the outside.
-version: '2.1'
 services:
   ups-status:
-    container_name: ${HOME_NAME}-ups-status
-    image: ups-status
+    container_name: ${HOME_NAME:-ups}-status
+    image: ups-status:latest
     network_mode: host
-    restart: always
+    restart: unless-stopped
+    environment:
+      - PORT=${PORT:-5002}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /usr/sbin/pwrstat:/usr/sbin/pwrstat:ro
       - /var/pwrstatd.ipc:/var/pwrstatd.ipc:ro
       - /var/pwrstatd.dev:/var/pwrstatd.dev:ro
-    build: 
+    build:
       context: .
       dockerfile: dockerfile
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import os, urllib.request; port = os.getenv('PORT', '5002'); urllib.request.urlopen(f'http://127.0.0.1:{port}/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     logging:
       options:
         max-size: 5m
         max-file: "3"
-

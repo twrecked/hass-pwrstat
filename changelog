@@ -1,3 +1,18 @@
+0.3.0-alpha.1:
+  Add native continuous energy sensor (kWh) for Home Assistant Energy Dashboard.
+  Add Load Percent sensor.
+  Modernize to modern Home Assistant standards (entry.runtime_data, typed ConfigEntry).
+  Set _attr_has_entity_name and remove hardcoded entity_ids.
+  Add dynamic DeviceInfo with live UPS model and firmware numbers.
+  Return typed numeric states (int/float) for statistics and graphing.
+  Add connection validation and Options Flow to config flow.
+  Add strings.json and update translations.
+  Modernize extras/pwrstat API with standard Flask and regex parsing.
+  Add /health endpoint and healthcheck to Docker setup.
+  Switch Dockerfile to python:3.12-slim.
+  Add hacs.json for custom repository HACS compatibility.
+  Fix fd command in install script.
+  Update documentation.
 0.2.0:
   add better support for asyncio
 0.1.1:

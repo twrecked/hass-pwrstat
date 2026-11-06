@@ -1,79 +1,102 @@
-"""
-This component provides support for pwrstat-api, a REST API wrapping
-Cyberpower's pwrstat command.
-
-"""
+"""This component provides support for pwrstat-api, a REST API wrapping Cyberpower's pwrstat command."""
 
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
-from homeassistant.util import slugify
+from homeassistant.core import HomeAssistant
 import homeassistant.helpers.device_registry as dr
+from homeassistant.util import slugify
 
-from .const import *
+from .const import (
+    ATTR_UPS_NAME,
+    ATTR_UPS_POLL_EVERY,
+    ATTR_UPS_URL,
+    COMPONENT_DOMAIN,
+    COMPONENT_MANUFACTURER,
+    COMPONENT_MODEL,
+    DOMAIN,
+)
 from .coordinator import PwrStatCoordinator
 
-
-__version__ = "0.2.0"
+__version__ = "0.3.0-alpha.1"
 
 _LOGGER = logging.getLogger(__name__)
 
-PWRSTAT_PLATFORMS = [
+PWRSTAT_PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
-    Platform.SENSOR
+    Platform.SENSOR,
 ]
 
+type PwrStatConfigEntry = ConfigEntry[PwrStatCoordinator]
 
-async def async_setup_entry(
-        hass: HomeAssistant,
-        entry: ConfigEntry
-) -> bool:
-    _LOGGER.debug(f"async setup {entry.data}")
 
-    if hass.data.get(COMPONENT_DOMAIN, None) is None:
-        hass.data[COMPONENT_DOMAIN] = {}
+async def async_setup_entry(hass: HomeAssistant, entry: PwrStatConfigEntry) -> bool:
+    """Set up pwrstat from a config entry."""
+    _LOGGER.debug("Setting up entry: %s", entry.data)
 
     ups_name = entry.data[ATTR_UPS_NAME]
-    ups_url = entry.data[ATTR_UPS_URL]
-    ups_poll_every = entry.data[ATTR_UPS_POLL_EVERY]
-    ups_id = slugify(f"{COMPONENT_DOMAIN} {ups_name}")
+    ups_url = entry.options.get(ATTR_UPS_URL, entry.data[ATTR_UPS_URL])
+    ups_poll_every = entry.options.get(ATTR_UPS_POLL_EVERY, entry.data[ATTR_UPS_POLL_EVERY])
+    ups_id = slugify(f"{DOMAIN} {ups_name}")
 
     coordinator = PwrStatCoordinator(hass, ups_name, ups_url, ups_poll_every)
-    hass.data[COMPONENT_DOMAIN].update({
-        ups_name: coordinator
-    })
-
     await coordinator.async_config_entry_first_refresh()
-    await _async_get_or_create_pwrstat_device_in_registry(hass, entry, ups_id, ups_name)
+
+    entry.runtime_data = coordinator
+
+    # Keep hass.data populated for backwards compatibility
+    hass.data.setdefault(DOMAIN, {})[ups_name] = coordinator
+
+    # Create/update device in device registry with live device info
+    _async_get_or_create_pwrstat_device_in_registry(hass, entry, coordinator, ups_id, ups_name)
+
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
     await hass.config_entries.async_forward_entry_setups(entry, PWRSTAT_PLATFORMS)
 
-    _LOGGER.debug(f"{ups_id}: would poll {ups_name} at {ups_url} every {ups_poll_every} seconds")
+    _LOGGER.debug(
+        "%s: polling %s at %s every %s seconds",
+        ups_id,
+        ups_name,
+        ups_url,
+        ups_poll_every,
+    )
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: PwrStatConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PWRSTAT_PLATFORMS):
         ups_name = entry.data[ATTR_UPS_NAME]
-        hass.data[COMPONENT_DOMAIN].pop(ups_name)
+        if DOMAIN in hass.data:
+            hass.data[DOMAIN].pop(ups_name, None)
 
     return unload_ok
 
 
-async def _async_get_or_create_pwrstat_device_in_registry(
-        hass: HomeAssistant,
-        entry: ConfigEntry,
-        ups_id,
-        ups_name
+async def async_reload_entry(hass: HomeAssistant, entry: PwrStatConfigEntry) -> None:
+    """Reload config entry after options change."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+
+def _async_get_or_create_pwrstat_device_in_registry(
+    hass: HomeAssistant,
+    entry: PwrStatConfigEntry,
+    coordinator: PwrStatCoordinator,
+    ups_id: str,
+    ups_name: str,
 ) -> None:
+    """Register or update device in registry."""
+    data = coordinator.data or {}
+    model = data.get("Model Name") or COMPONENT_MODEL
+    sw_version = data.get("Firmware Number") or __version__
+
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
-        identifiers={(COMPONENT_DOMAIN, ups_id)},
+        identifiers={(DOMAIN, ups_id)},
         manufacturer=COMPONENT_MANUFACTURER,
         name=ups_name,
-        model=COMPONENT_MODEL,
-        sw_version=__version__
+        model=model,
+        sw_version=sw_version,
     )

@@ -1,95 +1,114 @@
-# A pwrstat Home Assistant Integration
+# CyberPower pwrstat Home Assistant Integration
 
-An integration to poll a _Cyberpower_ UPS throught the [pwrstat-api](https://github.com/sbruggeman/pwrstat-api) wrapper.
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://github.com/hacs/integration)
+![Version](https://img.shields.io/badge/version-0.3.0--alpha.1-blue.svg?style=for-the-badge)
 
-# Thanks
+A Home Assistant integration to monitor CyberPower UPS devices via the lightweight `pwrstat-api` wrapper.
 
-Many thanks to:
-* @bruggeman for the `pwrstat-api` wrapper.
+---
 
-# Introduction
+## Features
 
-I wrote this to compliment the _pwrstat-api_ wrapper. I've been accessing the wrapper using the [RESTful API](https://www.home-assistant.io/integrations/rest/) integration and it was working great. But it was lacking full _Integration_ support and monitoring more than one UPS was a pain manage to config.
+* **Real-time Monitoring**: Tracks UPS load, battery capacity, input/output voltage, state, and remaining runtime.
+* **Native Energy Sensor (`kWh`)**: Automatically calculates continuous cumulative kilowatt-hours using Riemann sum integration and state restoration. Ready out of the box for the **Home Assistant Energy Dashboard** without helper templates.
+* **Load Percentage**: Dedicated load percentage sensor for dashboard gauges.
+* **Binary Sensors**: Instant alerting for utility power presence and low battery status.
+* **Dynamic Device Info**: Automatically discovers and displays your UPS model name and firmware version in the Home Assistant Device Registry.
+* **UI Config & Options Flow**: Configure and reconfigure polling intervals and URLs directly from the UI with connection validation.
+* **Lightweight Docker Wrapper**: Bundled under `extras/pwrstat/` using host socket mounts.
 
-I decided to add proper _Integration_ support.
+---
 
-The integration needs a working `pwrstat-api` server. The integration does not support any of the cloud feature of _Cyberpower_.
+## Entities Provided
 
-# Requirements
+| Entity | Domain | Device Class | Unit / Values | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Load** | Sensor | `power` | W (Watts) | Current power draw |
+| **Load Percent** | Sensor | — | % | Load as percentage of rated capacity |
+| **Energy** | Sensor | `energy` | kWh | Cumulative energy consumption (**Energy Dashboard**) |
+| **Battery Capacity**| Sensor | `battery` | % | Battery charge level |
+| **Output Voltage** | Sensor | `voltage` | V | Voltage delivered to connected equipment |
+| **Utility Voltage** | Sensor | `voltage` | V | Line voltage from utility |
+| **Remaining Runtime**| Sensor | `duration`| min | Estimated runtime on battery |
+| **State** | Sensor | `enum` | `normal`, `power failure` | Status with diagnostic attributes |
+| **Power** | Binary Sensor | `power` | On / Off | `On` when utility power is normal |
+| **Low Battery** | Binary Sensor | `battery` | On / Off | `On` when battery is below 35% |
 
-The integration needs a working install of `pwrstat-api` to provide the _UPS_ data in a _JSON_ format. You can install one directly from the official web site or look at the [A Quick pwrstat Docker Image](#a-quick-pwrstat-docker-image) section to see how to set one up from this repository.
+---
 
-# Installing the Integration
+## Requirements
 
-## HACS
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/hacs/integration)
+The integration connects to an instance of `pwrstat-api` running on the machine physically connected via USB to your UPS. See [Running the Docker API](#running-the-docker-api) below.
 
-Not yet...
+---
 
-## Manually
-Copy the `custom_components/pwrstat` directory into your `/config/custom_components` directory.
+## Installation
 
-## From Script
-Run the installation script. Run it once to make sure the operations look sane  
-and run it a second time with the `go` parameter to do the actual work. If you  
-update just rerun the script, it will overwrite all installed files.
+### Method 1: HACS (Recommended)
 
-```shell  
-install /config# check output looks good  
-install go /config
-```  
+1. Ensure [HACS](https://hacs.xyz/) is installed in Home Assistant.
+2. In Home Assistant, navigate to **HACS** > **Integrations**.
+3. Click the three dots in the top right corner and select **Custom repositories**.
+4. Enter:
+   * **Repository**: `https://github.com/twrecked/hass-pwrstat`
+   * **Type**: `Integration`
+5. Click **Add**, locate **CyberPower pwrstat**, and click **Download**.
+6. Restart Home Assistant.
 
-Restart your _Home Assistant_ installation.
+### Method 2: Installation Script
 
-# Adding and Configuring the Integration
+Clone the repository and run the install script:
 
-Follow these steps:
+```bash
+# Preview operations
+./install /path/to/homeassistant/config
 
-- Navigate to `Settings -> Devices & Services`.
-- Click on `+ ADD INTEGRATION`.
-- Search for `cyberpower` and select it.
-- Enter the _UPS_ name, its exact URL including the scheme, and how often you   
-  want to poll the device.
-- Click `Submit`.
+# Execute installation
+./install go /path/to/homeassistant/config
+```
 
-If it works you should see this:
+Restart Home Assistant.
+
+### Method 3: Manual Copy
+
+Copy the `custom_components/pwrstat` directory into your Home Assistant `/config/custom_components/` directory and restart Home Assistant.
+
+---
+
+## Configuration
+
+1. In Home Assistant, go to **Settings** > **Devices & Services**.
+2. Click **+ Add Integration** and search for `pwrstat` or `Cyberpower`.
+3. Fill in the fields:
+   * **Name**: Friendly name for this UPS (e.g. `Office UPS`).
+   * **URL**: Full URL to the API (e.g. `http://192.168.1.50:5002/pwrstat`).
+   * **Polling Interval**: Seconds between status polls (default: `30`).
+4. Click **Submit**.
 
 ![Sensor List](images/pwrstat-sensors.png)
 
-You can enter more than one _UPS_.
+You can add multiple UPS devices by repeating the process. To change the polling interval or URL later, select the integration and click **Configure**.
 
-# Extras
+---
 
-## Energy Sensor
+## Running the Docker API
 
-You can create an energy sensor to convert `W` into `kWh` with something similar to this:
+The `extras/pwrstat` directory contains a minimal Docker setup that runs alongside CyberPower's native Linux daemon (`pwrstatd`). It mounts the host binary and IPC sockets directly into a slim Python 3.12 container:
 
-```yaml  
-- platform: integration  
-  source: sensor.pwrstat_office_ups_load
-  name: pwrstat_office_ups_energy
-  unit_prefix: k
-  round: 2
-  method: left  
-```  
+```bash
+cd extras/pwrstat
 
-## A Quick pwrstat Docker Image
+# Start container (defaults to ups-status on port 5002)
+HOME_NAME=office docker compose up -d --build
 
-This is my snapshot of the `pwrstat-api` docker set up. I modified it to mount the local tools inside the docker so there was no need to include a `deb` file.
-
-You can create a docker instance with these commands:
-
-```bash  
-cd extras/pwstatcd
-docker build -t ups-status:latest -f dockerfile .
-HOME_NAME=your-name-goes-here docker-compose up  
-  
-# This should work.  
-wget -q -O - http://127.0.0.1:5002/pwrstat
-{"Battery Capacity": "80 %", "Firmware Number": "BF01902B1D1z", "Last Power Event": "Blackout at 2023/11/25 22:04:46 for 15 sec", "Line Interaction": "None", "Load": "86 Watt(23 %)", "Model Name": "ST Series", "Output Voltage": "116 V", "Power Supply by": "Utility Power", "Rating Power": "375 Watt", "Rating Voltage": "120 V", "Remaining Runtime": "19 min", "State": "Normal", "Test Result": "Passed at 2022/08/24 10:20:31", "Utility Voltage": "116 V"}
+# Verify API
+curl http://127.0.0.1:5002/pwrstat
 ```
 
-## Nut
-You can also use [Network UPS Tools](https://www.home-assistant.io/integrations/nut/).
+See [extras/pwrstat/README.md](extras/pwrstat/README.md) for full documentation and volume mounting details.
 
-And I did for the longest time and it great. I just found it a little too powerful for my needs. I have 2 PCs each with a Cyberpower UPS on them and it ended up being simpler to monitor them in _Home Assistant_ so a lot of the extra functionality was moot. Look at it if you're trying to hook different UPS devices together across a variety of systems.  
+---
+
+## Acknowledgments
+
+* Based on the concept by [@bruggeman](https://github.com/sbruggeman/pwrstat-api).
