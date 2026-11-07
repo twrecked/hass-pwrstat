@@ -222,6 +222,7 @@ class PwrStatSensor(CoordinatorEntity[PwrStatCoordinator], SensorEntity):
         self._ups_id = ups_id
         self._ups_name = ups_name
         self._attr_unique_id = slugify(f"{ups_id} {self.entity_description.suffix}")
+        self.entity_id = f"sensor.{self._attr_unique_id}"
         self._attr_device_info = _build_device_info(coordinator, ups_id, ups_name)
 
         _LOGGER.debug("PwrStatSensor: created %s (%s)", self._attr_unique_id, description.name)
@@ -298,6 +299,7 @@ class PwrStatEnergySensor(CoordinatorEntity[PwrStatCoordinator], RestoreEntity, 
         self._ups_id = ups_id
         self._ups_name = ups_name
         self._attr_unique_id = slugify(f"{ups_id} Energy")
+        self.entity_id = f"sensor.{self._attr_unique_id}"
         self._attr_device_info = _build_device_info(coordinator, ups_id, ups_name)
 
         self._energy_accumulator: float = 0.0
