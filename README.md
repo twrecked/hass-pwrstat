@@ -31,7 +31,7 @@ A Home Assistant integration to monitor CyberPower UPS devices via the lightweig
 | **Utility Voltage** | Sensor | `voltage` | V | Line voltage from utility |
 | **Remaining Runtime**| Sensor | `duration`| min | Estimated runtime on battery |
 | **State** | Sensor | `enum` | `normal`, `power failure` | Status with diagnostic attributes |
-| **Power** | Binary Sensor | `power` | On / Off | `On` when utility power is normal |
+| **Utility Power** | Binary Sensor | `power` | On / Off | `On` when utility power is normal |
 | **Low Battery** | Binary Sensor | `battery` | On / Off | `On` when battery is below 35% |
 
 ---

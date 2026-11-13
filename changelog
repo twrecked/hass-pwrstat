@@ -1,3 +1,8 @@
+0.3.0-beta.1:
+  Rename Power binary sensor to Utility Power.
+  Explicitly set default entity IDs for sensors and binary sensors.
+  Move install and release publishing scripts to scripts directory.
+  Update documentation.
 0.3.0-alpha.1:
   Add native continuous energy sensor (kWh) for Home Assistant Energy Dashboard.
   Add Load Percent sensor.

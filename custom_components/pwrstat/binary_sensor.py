@@ -57,9 +57,9 @@ class PwrStatBinarySensorDescription(BinarySensorEntityDescription):
 SENSORS: list[PwrStatBinarySensorDescription] = [
     PwrStatBinarySensorDescription(
         key="State",
-        name="Power",
+        name="Utility Power",
         device_class=BinarySensorDeviceClass.POWER,
-        suffix="Power",
+        suffix="Utility Power",
         test=_test_power_normal,
     ),
     PwrStatBinarySensorDescription(
@@ -122,6 +122,7 @@ class PwrStatBinarySensor(CoordinatorEntity[PwrStatCoordinator], BinarySensorEnt
         self._ups_id = ups_id
         self._ups_name = ups_name
         self._attr_unique_id = slugify(f"{ups_id} {self.entity_description.suffix}")
+        self.entity_id = f"binary_sensor.{self._attr_unique_id}"
         self._attr_device_info = _build_device_info(coordinator, ups_id, ups_name)
 
         _LOGGER.debug(
